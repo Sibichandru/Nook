@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* =========================
+       Light Theme — Journal UI
+    ========================= */
+
+    /* Page */
+    --background: 40 18% 96%;
+    /* warm beige */
+    --foreground: 30 12% 22%;
+    /* soft charcoal */
+
+    /* Cards & surfaces */
+    --card: 40 22% 98%;
+    --card-foreground: 30 12% 22%;
+
+    --popover: 40 22% 98%;
+    --popover-foreground: 30 12% 22%;
+
+    /* Primary accent — sage green */
+    --primary: 145 18% 45%;
+    --primary-foreground: 40 25% 99%;
+
+    /* Secondary surfaces */
+    --secondary: 40 16% 93%;
+    --secondary-foreground: 30 10% 30%;
+
+    /* Muted UI */
+    --muted: 40 14% 92%;
+    --muted-foreground: 30 8% 48%;
+
+    /* Accent pills / mood */
+    --accent: 140 18% 90%;
+    --accent-foreground: 145 22% 30%;
+
+    /* Errors */
+    --destructive: 0 55% 55%;
+    --destructive-foreground: 40 25% 99%;
+
+    /* Borders & inputs (very subtle) */
+    --border: 40 14% 88%;
+    --input: 40 14% 90%;
+    --ring: 145 18% 45%;
+
+    /* Radius */
+    --radius: 0.85rem;
+
+    /* Shadows — soft, floating */
+    --shadow:
+      0 12px 30px rgba(0, 0, 0, 0.08),
+      0 4px 10px rgba(0, 0, 0, 0.04);
+
+    /* Mood colors */
+    --mood-very-low: 0 45% 65%;
+    --mood-low: 25 55% 60%;
+    --mood-neutral: 45 45% 55%;
+    --mood-high: 120 30% 55%;
+    --mood-very-high: 145 35% 50%;
+
+    /* Sidebar (same tone as cards) */
+    --sidebar-background: 40 20% 97%;
+    --sidebar-foreground: 30 12% 28%;
+    --sidebar-primary: 145 18% 45%;
+    --sidebar-primary-foreground: 40 25% 99%;
+    --sidebar-accent: 40 16% 93%;
+    --sidebar-accent-foreground: 30 12% 28%;
+    --sidebar-border: 40 14% 88%;
+    --sidebar-ring: 145 18% 45%;
+  }
+
+  /* =========================
+     Dark Theme — Calm & Warm
+  ========================= */
+  .dark {
+    --background: 30 10% 12%;
+    /* warm charcoal */
+    --foreground: 40 20% 88%;
+    /* creamy text */
+
+    --card: 30 12% 16%;
+    --card-foreground: 40 20% 88%;
+
+    --popover: 30 12% 16%;
+    --popover-foreground: 40 20% 88%;
+
+    --primary: 145 20% 55%;
+    --primary-foreground: 30 10% 12%;
+
+    --secondary: 30 10% 20%;
+    --secondary-foreground: 40 18% 82%;
+
+    --muted: 30 8% 22%;
+    --muted-foreground: 40 10% 60%;
+
+    --accent: 145 15% 22%;
+    --accent-foreground: 145 25% 70%;
+
+    --destructive: 0 45% 45%;
+    --destructive-foreground: 40 20% 88%;
+
+    --border: 30 8% 24%;
+    --input: 30 8% 24%;
+    --ring: 145 20% 55%;
+
+    --shadow:
+      0 20px 40px rgba(0, 0, 0, 0.35),
+      0 6px 16px rgba(0, 0, 0, 0.25);
+
+    --sidebar-background: 30 10% 14%;
+    --sidebar-foreground: 40 18% 82%;
+    --sidebar-primary: 145 20% 55%;
+    --sidebar-primary-foreground: 30 10% 12%;
+    --sidebar-accent: 30 10% 20%;
+    --sidebar-accent-foreground: 40 18% 82%;
+    --sidebar-border: 30 8% 24%;
+    --sidebar-ring: 145 20% 55%;
+  }
+}
+
+/* =========================
+   Global polish
+========================= */
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* App layout */
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Loader overlay */
+.loader-container {
+  position: fixed;
+  inset: 0;
+  background-color: hsl(var(--background) / 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}

@@ -1,0 +1,9 @@
+.diary-card {
+    min-height: 70vh;
+    width: 65%;
+    background-color: var(--card);
+    color: var(--card-foreground);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    box-shadow: var(--shadow);
+}
