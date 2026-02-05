@@ -1,8 +1,8 @@
 'use client'
 
-const Loader = () => {
+const Loader = ({className="loader-container"}: {className?: string}) => {
   return (
-    <div className="flex flex-1 justify-center items-center h-full w-full loader-container">
+    <div className={`flex flex-1 justify-center items-center h-full w-full ${className}`}>
       <img
         src="/assets/loading.svg"
         alt="Loading"

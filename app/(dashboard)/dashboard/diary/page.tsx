@@ -4,10 +4,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/app/providers/auth-providers';
 import { createClient } from '@/lib/supabase/client';
+import { Calendar as MantineCalendar } from '@mantine/dates';
+import dayjs from 'dayjs';
 import Loader from '@/components/Loader';
 import './diary.css';
-
-const today = new Date().toISOString().split('T')[0];
 
 type DiaryEntry = {
     title: string;
@@ -16,56 +16,41 @@ type DiaryEntry = {
     entry_date: string;
 };
 
-enum Mood {
-    '😀' = 1,
-    '🙂' = 2,
-    '😐' = 3,
-    '🙁' = 4,
-    '😞' = 5,
-    'null' = 'How are you feeling today?',
-}
-type CalendarButton = {
-    icon?: React.ReactNode;
-    label?: (selectedDate: string) => React.ReactNode;
-    onClick: (key: string) => void;
+const MOODS = [
+    { value: 1, emoji: '😀', label: 'Great' },
+    { value: 2, emoji: '🙂', label: 'Good' },
+    { value: 3, emoji: '😐', label: 'Okay' },
+    { value: 4, emoji: '🙁', label: 'Low' },
+    { value: 5, emoji: '😞', label: 'Bad' },
+];
+
+function formatDisplayDate(dateStr: string): string {
+    const date = new Date(dateStr + 'T12:00:00');
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
 }
 
-const calendarButtonKeys = ['previous', 'selected', 'next'] as const;
-type CalendarButtonKey = typeof calendarButtonKeys[number];
-
-
-const CalendarButtons: Record<CalendarButtonKey, CalendarButton> = {
-    previous: {
-        icon: <ChevronLeft />,
-        onClick: (key: string) => {
-            console.log(key)
-        }
-    },
-    selected: {
-        label: (selectedDate: string) => {
-            return <span className='text-sm font-medium'>{selectedDate || ''}</span>
-        },
-        onClick: (key: string) => {
-            console.log(key)
-        }
-    },
-    next: {
-        icon: <ChevronRight />,
-        onClick: (key: string) => {
-            console.log(key)
-        }
-    },
+function dateToString(date: Date): string {
+    return date.toISOString().split('T')[0];
 }
+
 export default function Diary() {
     const supabase = createClient();
     const { user, authLoading } = useAuth();
 
     const [loading, setLoading] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+    const [showCalendar, setShowCalendar] = useState(false);
+    const [showMoodPicker, setShowMoodPicker] = useState(false);
+    const [selected, setSelected] = useState<string[]>([]);
     const [data, setData] = useState<DiaryEntry>({
         title: '',
         content: '',
         mood: null,
-        entry_date: today,
+        entry_date: selectedDate,
     });
 
     const fetchEntry = useCallback(async () => {
@@ -77,7 +62,7 @@ export default function Diary() {
             .from('diary_entries')
             .select('title, content, mood, entry_date')
             .eq('user_id', user.id)
-            .eq('entry_date', today)
+            .eq('entry_date', selectedDate)
             .maybeSingle();
 
         if (error) {
@@ -86,10 +71,17 @@ export default function Diary() {
 
         if (entry) {
             setData(entry);
+        } else {
+            setData({
+                title: '',
+                content: '',
+                mood: null,
+                entry_date: selectedDate,
+            });
         }
 
         setLoading(false);
-    }, [user, supabase]);
+    }, [user, supabase, selectedDate]);
 
     useEffect(() => {
         if (user) {
@@ -97,7 +89,31 @@ export default function Diary() {
         }
     }, [user, fetchEntry]);
 
-    const onSave = async () => {
+    const navigateDate = (direction: 'prev' | 'next') => {
+        const current = new Date(selectedDate + 'T12:00:00');
+        console.log(current, 'current')
+        if (direction === 'prev') {
+            current.setDate(current.getDate() - 1);
+
+        } else {
+            current.setDate(current.getDate() + 1);
+        }
+        setSelectedDate(dateToString(current));
+    };
+
+    const goToToday = () => {
+        setSelectedDate(dateToString(new Date()));
+        setSelected([]);
+        setShowCalendar(false);
+    };
+
+    const selectMood = (value: number) => {
+        setData({ ...data, mood: value });
+        setShowMoodPicker(false);
+    };
+
+    const onSave = async (e: React.SubmitEvent) => {
+        e.preventDefault();
         if (!user) return;
 
         setLoading(true);
@@ -108,7 +124,7 @@ export default function Diary() {
                 {
                     ...data,
                     user_id: user.id,
-                    entry_date: today,
+                    entry_date: selectedDate,
                 },
                 {
                     onConflict: 'user_id,entry_date',
@@ -122,39 +138,136 @@ export default function Diary() {
         setLoading(false);
     };
 
-    if (authLoading || loading) {
+    const currentMood = MOODS.find(m => m.value === data.mood);
+    const handleSelect = (date: string) => {
+        console.log(date)
+        setSelected([date]);
+        setSelectedDate(date);
+        setShowCalendar(false);
+    };
+
+    if (authLoading) {
         return <Loader />;
     }
 
     return (
-        <div className="flex flex-1 flex-col items-center min-h-full gap-4">
-            <div className="flex items-center justify-between w-full max-w-md">
-                {calendarButtonKeys.map((key) => {
-                    const button = CalendarButtons[key];
-                    return (
-                        <button
-                            key={key}
-                            className="cursor-pointer hover:bg-muted/50 p-2"
-                            onClick={() => button.onClick(key)}
-                        >
-                            {button.icon ?? button.label?.(today)}
+        <div className="diary-container">
+            <div className="date-picker-wrapper">
+                <button
+                    type="button"
+                    className="date-nav-btn"
+                    onClick={() => navigateDate('prev')}
+                    aria-label="Previous day"
+                >
+                    <ChevronLeft size={20} />
+                </button>
+
+                <div className="relative">
+                    <span
+                        className="date-display"
+                        onClick={() => setShowCalendar(!showCalendar)}
+                    >
+                        {formatDisplayDate(selectedDate)}
+                    </span>
+
+                    {showCalendar && (
+                        <div className="calendar-dropdown">
+                            <MantineCalendar
+                                withCellSpacing={false}
+                                getDayProps={(date) => ({
+                                    selected: selected.some((s) => dayjs(date).isSame(s, 'date')),
+                                    onClick: () => handleSelect(date),
+                                })}
+                            />
+                            <button
+                                type="button"
+                                className="calendar-today-btn"
+                                onClick={goToToday}
+                            >
+                                Today
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <button
+                    type="button"
+                    className="date-nav-btn"
+                    onClick={() => navigateDate('next')}
+                    aria-label="Next day"
+                >
+                    <ChevronRight size={20} />
+                </button>
+            </div>
+
+            {/* Diary Card */}
+            {loading && <Loader className='diary-loader'/>}
+            {!loading && (
+                <div className="diary-card">
+                    <form className="diary-form" onSubmit={onSave}>
+                        {/* Mood Selector */}
+                        <div className="relative">
+                            <button
+                                type="button"
+                                className="mood-selector"
+                                onClick={() => setShowMoodPicker(!showMoodPicker)}
+                            >
+                                <span>Mood:</span>
+                                <span className="mood-emoji">
+                                    {currentMood?.emoji ?? '🙂'}
+                                </span>
+                                <ChevronRight size={16} className="mood-chevron" />
+                            </button>
+
+                            {showMoodPicker && (
+                                <div className="mood-picker">
+                                    {MOODS.map((mood) => (
+                                        <button
+                                            key={mood.value}
+                                            type="button"
+                                            className={`mood-option ${data.mood === mood.value ? 'selected' : ''}`}
+                                            onClick={() => selectMood(mood.value)}
+                                            title={mood.label}
+                                        >
+                                            {mood.emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Title Field */}
+                        <div className="form-field">
+                            <label htmlFor="title" className="form-label">Title</label>
+                            <input
+                                type="text"
+                                id="title"
+                                className="form-input"
+                                placeholder="A calm day"
+                                value={data.title}
+                                onChange={(e) => setData({ ...data, title: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Entry Field */}
+                        <div className="form-field">
+                            <label htmlFor="entry" className="form-label">Entry</label>
+                            <textarea
+                                id="entry"
+                                className="form-input form-textarea"
+                                placeholder="Today I felt relaxed and productive."
+                                value={data.content}
+                                onChange={(e) => setData({ ...data, content: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Save Button */}
+                        <button type="submit" className="save-btn">
+                            Save Entry
                         </button>
-                    );
-                })}
-            </div>
-            <div className="bg-card border border-primary/30 rounded-xl p-4 diary-card">
-                <form className='flex flex-col gap-4 p-10' onSubmit={onSave}>
-                    <div className='flex flex-col gap-2'>
-                        <label htmlFor="title">Title</label>
-                        <input type="text" value={data.title} onChange={(e) => setData({ ...data, title: e.target.value })} />
-                    </div>
-                    <div className='flex flex-col gap-2'>
-                        <label htmlFor="content">Content</label>
-                        <textarea value={data.content} onChange={(e) => setData({ ...data, content: e.target.value })} />
-                    </div>
-                    <button type='submit'>Save</button>
-                </form>
-            </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }

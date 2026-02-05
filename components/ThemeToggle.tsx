@@ -10,21 +10,27 @@ export function ThemeToggle() {
   // On mount, check localStorage or system preference
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("theme");
-    if (stored === "dark") {
-      setIsDark(true);
-      document.documentElement.classList.add("dark");
-    } else if (stored === "light") {
-      setIsDark(false);
-      document.documentElement.classList.remove("dark");
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setIsDark(prefersDark);
-      if (prefersDark) {
-        document.documentElement.classList.add("dark");
-      }
-    }
+    // const stored = localStorage.getItem("theme");
+    // if (stored === "dark") {
+    //   setIsDark(true);
+    //   document.documentElement.classList.add("dark");
+    //   document.documentElement.setAttribute("data-mantine-color-scheme", "dark");
+    // } else if (stored === "light") {
+    //   setIsDark(false);
+    //   document.documentElement.classList.remove("dark");
+    //   document.documentElement.setAttribute("data-mantine-color-scheme", "light");
+    // } else {
+    //   // Check system preference
+    //   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    //   setIsDark(prefersDark);
+    //   if (prefersDark) {
+    //     document.documentElement.classList.add("dark");
+    //     document.documentElement.setAttribute("data-mantine-color-scheme", "dark");
+    //   } else {
+    //     document.documentElement.classList.remove("dark");
+    //     document.documentElement.setAttribute("data-mantine-color-scheme", "light");
+    //   }
+    // }
   }, []);
 
   const toggleTheme = () => {
@@ -32,9 +38,11 @@ export function ThemeToggle() {
     setIsDark(newIsDark);
     if (newIsDark) {
       document.documentElement.classList.add("dark");
+      document.documentElement.setAttribute("data-mantine-color-scheme", "dark");
       localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      document.documentElement.setAttribute("data-mantine-color-scheme", "light");
       localStorage.setItem("theme", "light");
     }
   };

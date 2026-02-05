@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { AuthProvider } from "./providers/auth-providers";
+import "./globals.css";
+import { MantineAppProvider } from "./providers/mantine-provider";
+import { DatesProvider } from '@mantine/dates';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,14 +16,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MPN",
+  title: "Nook",
   description: "An App to Manage Personal Needs",
   openGraph: {
-    title: 'My Site',
-    description: 'Welcome to My Site',
-    url: 'https://example.com',
-    siteName: 'My Site',
-    images: [{ url: 'https://example.com/og.png' }]
+    title: 'Nook',
+    description: 'An App to Manage Personal Needs',
+    url: 'https://nookapp.in',
+    siteName: 'Nook',
+    images: [{ url: 'https://nookapp.in/og.png' }]
   },
 };
 
@@ -34,7 +36,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
-          <div className="app-root">{children}</div>
+          <MantineAppProvider>
+            <DatesProvider settings={{ locale: 'en' }}>
+              <div className="app-root">{children}</div>
+            </DatesProvider>
+          </MantineAppProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,9 +1,437 @@
+.diary-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 16px;
+  min-height: 100%;
+}
+
+/* Date Picker Header */
+.date-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.date-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.date-nav-btn:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.date-display {
+  font-size: 1rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  transition: background-color 0.2s ease;
+}
+
+.date-display:hover {
+  background-color: hsl(var(--secondary));
+}
+
+/* Calendar Dropdown */
+.calendar-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: hsl(var(--card));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  z-index: 100;
+  min-width: 280px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.calendar-month-year {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.calendar-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.calendar-icon-btn:hover {
+  background-color: hsl(var(--secondary));
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  padding: 4px 0;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  transition: background-color 0.15s ease;
+}
+
+.calendar-day:hover {
+  background-color: hsl(var(--secondary));
+}
+
+.calendar-day.selected {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.calendar-day.other-month {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+}
+
+.calendar-today-btn {
+  width: 100%;
+  padding: 8px;
+  margin-top: 12px;
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-today-btn:hover {
+  background-color: hsl(var(--secondary));
+}
+
+/* Diary Card */
 .diary-card {
-    min-height: 70vh;
-    width: 65%;
-    background-color: var(--card);
-    color: var(--card-foreground);
-    border-radius: var(--radius);
-    padding: var(--padding);
-    box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 480px;
+  background-color: hsl(var(--card));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+.diary-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Mood Selector */
+.mood-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: hsl(var(--secondary));
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: hsl(var(--secondary-foreground));
+  transition: background-color 0.2s ease;
+  align-self: flex-start;
+}
+
+.mood-selector:hover {
+  background-color: hsl(var(--accent));
+}
+
+.mood-emoji {
+  font-size: 1rem;
+}
+
+.mood-chevron {
+  width: 16px;
+  height: 16px;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Mood Picker Dropdown */
+.mood-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background-color: hsl(var(--card));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 100;
+}
+
+.mood-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.mood-option:hover {
+  background-color: hsl(var(--secondary));
+  transform: scale(1.15);
+}
+
+.mood-option.selected {
+  background-color: hsl(var(--primary));
+}
+
+/* Form Fields */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}
+
+.form-textarea {
+  min-height: 120px;
+  max-height: 420px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+/* Save Button */
+.save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 32px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  align-self: center;
+  margin-top: 8px;
+}
+
+.save-btn:hover {
+  background-color: hsl(var(--primary) / 0.9);
+  transform: translateY(-1px);
+}
+
+.save-btn:active {
+  transform: translateY(0);
+}
+
+/* Relative positioning for dropdowns */
+.relative {
+  position: relative;
+}
+
+/* Calendar wrapper in header */
+.date-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+/* ===========================
+   Mantine Calendar Overrides
+   =========================== */
+
+/* Calendar dropdown container */
+.calendar-dropdown {
+  position: absolute;
+  top: 100%;
+  right: -80px;
+  margin-top: 8px;
+  background-color: hsl(var(--card));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  z-index: 100;
+}
+
+/* Mantine Calendar root */
+.calendar-dropdown .mantine-Calendar-calendar {
+  background: transparent;
+}
+
+/* Calendar header (month/year) */
+.calendar-dropdown .mantine-Calendar-calendarHeader {
+  margin-bottom: 8px;
+}
+
+.calendar-dropdown .mantine-Calendar-calendarHeaderLevel {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.calendar-dropdown .mantine-Calendar-calendarHeaderControl {
+  color: hsl(var(--muted-foreground));
+  border-radius: 4px;
+}
+
+.calendar-dropdown .mantine-Calendar-calendarHeaderControl:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+/* Weekday headers */
+.calendar-dropdown .mantine-Calendar-weekday {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  padding: 4px 0;
+}
+
+/* Day cells */
+.calendar-dropdown .mantine-Calendar-day {
+  font-size: 0.85rem;
+  color: hsl(var(--foreground));
+  border-radius: 50%;
+  transition: background-color 0.15s ease;
+}
+
+.calendar-dropdown .mantine-Calendar-day:hover {
+  background-color: hsl(var(--secondary));
+}
+
+/* Selected day */
+.calendar-dropdown .mantine-Calendar-day[data-selected] {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.calendar-dropdown .mantine-Calendar-day[data-selected]:hover {
+  background-color: hsl(var(--primary));
+}
+
+/* Outside month days */
+.calendar-dropdown .mantine-Calendar-day[data-outside] {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+}
+
+/* Today indicator */
+.calendar-dropdown .mantine-Calendar-day[data-today] {
+  border: 1px solid hsl(var(--primary));
+}
+
+/* Today button styling */
+.calendar-dropdown .calendar-today-btn {
+  width: 100%;
+  padding: 8px;
+  margin-top: 12px;
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-dropdown .calendar-today-btn:hover {
+  background-color: hsl(var(--secondary));
+}
+
+.diary-loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
