@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { useAuth } from '@/app/providers/auth-providers';
 import { createClient } from '@/lib/supabase/client';
 import { Calendar as MantineCalendar } from '@mantine/dates';
@@ -24,131 +24,163 @@ const MOODS = [
     { value: 5, emoji: '😞', label: 'Bad' },
 ];
 
-function formatDisplayDate(dateStr: string): string {
-    const date = new Date(dateStr + 'T12:00:00');
-    return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
-}
-
-function dateToString(date: Date): string {
-    return date.toISOString().split('T')[0];
-}
+const INITIAL_ENTRY: DiaryEntry = {
+    title: '',
+    content: '',
+    mood: null,
+    entry_date: '',
+};
 
 export default function Diary() {
     const supabase = createClient();
     const { user, authLoading } = useAuth();
-
-    const [loading, setLoading] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+    
+    // UI State
+    const [selectedDate, setSelectedDate] = useState(() => dayjs().format('YYYY-MM-DD'));
     const [showCalendar, setShowCalendar] = useState(false);
     const [showMoodPicker, setShowMoodPicker] = useState(false);
-    const [selected, setSelected] = useState<string[]>([]);
-    const [data, setData] = useState<DiaryEntry>({
-        title: '',
-        content: '',
-        mood: null,
-        entry_date: selectedDate,
-    });
+    
+    // Data State
+    const [isLoadingEntry, setIsLoadingEntry] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [currentEntry, setCurrentEntry] = useState<DiaryEntry>({ ...INITIAL_ENTRY, entry_date: selectedDate });
+    
+    // Cache
+    const entriesCache = useRef<Map<string, DiaryEntry>>(new Map());
+    const abortController = useRef<AbortController | null>(null);
 
-    const fetchEntry = useCallback(async () => {
+    // Fetch entry for a specific date
+    const fetchEntry = useCallback(async (date: string) => {
         if (!user) return;
 
-        setLoading(true);
-
-        const { data: entry, error } = await supabase
-            .from('diary_entries')
-            .select('title, content, mood, entry_date')
-            .eq('user_id', user.id)
-            .eq('entry_date', selectedDate)
-            .maybeSingle();
-
-        if (error) {
-            console.error('Fetch error:', error);
+        // cancel previous request if any
+        if (abortController.current) {
+            abortController.current.abort();
+        }
+        
+        // Check cache first
+        if (entriesCache.current.has(date)) {
+            setCurrentEntry(entriesCache.current.get(date)!);
+            return;
         }
 
-        if (entry) {
-            setData(entry);
-        } else {
-            setData({
-                title: '',
-                content: '',
-                mood: null,
-                entry_date: selectedDate,
-            });
-        }
+        setIsLoadingEntry(true);
+        abortController.current = new AbortController();
 
-        setLoading(false);
+        try {
+            const { data: entry, error } = await supabase
+                .from('diary_entries')
+                .select('title, content, mood, entry_date')
+                .eq('user_id', user.id)
+                .eq('entry_date', date)
+                .maybeSingle();
+
+            if (error) throw error;
+
+            const newEntry = entry || {
+                ...INITIAL_ENTRY,
+                entry_date: date,
+            };
+
+            // Update cache and state
+            entriesCache.current.set(date, newEntry);
+            
+            // Only update state if this is still the selected date (handling race conditions)
+            if (date === selectedDate) {
+                setCurrentEntry(newEntry);
+            }
+        } catch (error) {
+            if (error instanceof Error && error.name !== 'AbortError') {
+                console.error('Fetch error:', error);
+            }
+        } finally {
+            if (date === selectedDate) {
+                setIsLoadingEntry(false);
+            }
+        }
     }, [user, supabase, selectedDate]);
 
+    // Initial load and date changes
     useEffect(() => {
         if (user) {
-            fetchEntry();
+            // Update current entry date immediately for UI responsiveness
+            setCurrentEntry(prev => ({ ...prev, entry_date: selectedDate }));
+
+            // If in cache, load immediately
+            if (entriesCache.current.has(selectedDate)) {
+                fetchEntry(selectedDate);
+                return;
+            }
+
+            // Otherwise debounce the fetch
+            const timeoutId = setTimeout(() => {
+                fetchEntry(selectedDate);
+            }, 500);
+
+            return () => {
+                clearTimeout(timeoutId);
+                // Also abort any in-flight requests if we leave this date
+                if (abortController.current) {
+                    abortController.current.abort();
+                }
+            };
         }
-    }, [user, fetchEntry]);
+    }, [user, selectedDate, fetchEntry]);
 
     const navigateDate = (direction: 'prev' | 'next') => {
-        const current = new Date(selectedDate + 'T12:00:00');
-        console.log(current, 'current')
-        if (direction === 'prev') {
-            current.setDate(current.getDate() - 1);
-
-        } else {
-            current.setDate(current.getDate() + 1);
-        }
-        setSelectedDate(dateToString(current));
+        const nextDate = direction === 'prev' 
+            ? dayjs(selectedDate).subtract(1, 'day') 
+            : dayjs(selectedDate).add(1, 'day');
+        setSelectedDate(nextDate.format('YYYY-MM-DD'));
     };
 
     const goToToday = () => {
-        setSelectedDate(dateToString(new Date()));
-        setSelected([]);
+        const today = dayjs().format('YYYY-MM-DD');
+        setSelectedDate(today);
         setShowCalendar(false);
     };
 
-    const selectMood = (value: number) => {
-        setData({ ...data, mood: value });
-        setShowMoodPicker(false);
+    const handleDateSelect = (date: Date | string) => {
+        setSelectedDate(dayjs(date).format('YYYY-MM-DD'));
+        setShowCalendar(false);
     };
 
-    const onSave = async (e: React.SubmitEvent) => {
+    const updateEntryState = (updates: Partial<DiaryEntry>) => {
+        const updated = { ...currentEntry, ...updates };
+        setCurrentEntry(updated);
+        // Optimistically update cache
+        entriesCache.current.set(selectedDate, updated);
+    };
+
+    const onSave = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user) return;
 
-        setLoading(true);
-
+        setIsSaving(true);
         const { error } = await supabase
             .from('diary_entries')
             .upsert(
                 {
-                    ...data,
+                    ...currentEntry,
                     user_id: user.id,
                     entry_date: selectedDate,
                 },
-                {
-                    onConflict: 'user_id,entry_date',
-                }
+                { onConflict: 'user_id,entry_date' }
             );
 
         if (error) {
             console.error('Save error:', error);
+            // Optionally revert cache/state here on error
+        } else {
+            // Confirm cache update
+            entriesCache.current.set(selectedDate, currentEntry);
         }
-
-        setLoading(false);
+        setIsSaving(false);
     };
 
-    const currentMood = MOODS.find(m => m.value === data.mood);
-    const handleSelect = (date: string) => {
-        console.log(date)
-        setSelected([date]);
-        setSelectedDate(date);
-        setShowCalendar(false);
-    };
+    const currentMood = MOODS.find(m => m.value === currentEntry.mood);
 
-    if (authLoading) {
-        return <Loader />;
-    }
+    if (authLoading) return <Loader />;
 
     return (
         <div className="diary-container">
@@ -163,20 +195,21 @@ export default function Diary() {
                 </button>
 
                 <div className="relative">
-                    <span
+                    <button
+                        type="button"
                         className="date-display"
                         onClick={() => setShowCalendar(!showCalendar)}
                     >
-                        {formatDisplayDate(selectedDate)}
-                    </span>
+                        {dayjs(selectedDate).format('MMM D, YYYY')}
+                    </button>
 
                     {showCalendar && (
                         <div className="calendar-dropdown">
                             <MantineCalendar
                                 withCellSpacing={false}
                                 getDayProps={(date) => ({
-                                    selected: selected.some((s) => dayjs(date).isSame(s, 'date')),
-                                    onClick: () => handleSelect(date),
+                                    selected: dayjs(date).isSame(selectedDate, 'day'),
+                                    onClick: () => handleDateSelect(date),
                                 })}
                             />
                             <button
@@ -201,73 +234,90 @@ export default function Diary() {
             </div>
 
             {/* Diary Card */}
-            {loading && <Loader className='diary-loader'/>}
-            {!loading && (
-                <div className="diary-card">
-                    <form className="diary-form" onSubmit={onSave}>
-                        {/* Mood Selector */}
-                        <div className="relative">
-                            <button
-                                type="button"
-                                className="mood-selector"
-                                onClick={() => setShowMoodPicker(!showMoodPicker)}
-                            >
-                                <span>Mood:</span>
-                                <span className="mood-emoji">
-                                    {currentMood?.emoji ?? '🙂'}
-                                </span>
-                                <ChevronRight size={16} className="mood-chevron" />
-                            </button>
+            <div className={`diary-card transition-opacity duration-200 ${isLoadingEntry ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                <form className="diary-form" onSubmit={onSave}>
+                    {/* Mood Selector */}
+                    <div className="relative">
+                        <button
+                            type="button"
+                            className="mood-selector"
+                            onClick={() => setShowMoodPicker(!showMoodPicker)}
+                        >
+                            <span>Mood:</span>
+                            <span className="mood-emoji">
+                                {currentMood?.emoji ?? '🙂'}
+                            </span>
+                            <ChevronRight size={16} className={`mood-chevron transition-transform ${showMoodPicker ? 'rotate-90' : ''}`} />
+                        </button>
 
-                            {showMoodPicker && (
-                                <div className="mood-picker">
+                        {showMoodPicker && (
+                            <>
+                                <div 
+                                    className="fixed inset-0 z-10" 
+                                    onClick={() => setShowMoodPicker(false)}
+                                />
+                                <div className="mood-picker z-20">
                                     {MOODS.map((mood) => (
                                         <button
                                             key={mood.value}
                                             type="button"
-                                            className={`mood-option ${data.mood === mood.value ? 'selected' : ''}`}
-                                            onClick={() => selectMood(mood.value)}
+                                            className={`mood-option ${currentEntry.mood === mood.value ? 'selected' : ''}`}
+                                            onClick={() => {
+                                                updateEntryState({ mood: mood.value });
+                                                setShowMoodPicker(false);
+                                            }}
                                             title={mood.label}
                                         >
                                             {mood.emoji}
                                         </button>
                                     ))}
                                 </div>
-                            )}
-                        </div>
+                            </>
+                        )}
+                    </div>
 
-                        {/* Title Field */}
-                        <div className="form-field">
-                            <label htmlFor="title" className="form-label">Title</label>
-                            <input
-                                type="text"
-                                id="title"
-                                className="form-input"
-                                placeholder="A calm day"
-                                value={data.title}
-                                onChange={(e) => setData({ ...data, title: e.target.value })}
-                            />
-                        </div>
+                    {/* Title Field */}
+                    <div className="form-field">
+                        <label htmlFor="title" className="form-label">Title</label>
+                        <input
+                            type="text"
+                            id="title"
+                            className="form-input"
+                            placeholder="A calm day"
+                            value={currentEntry.title}
+                            onChange={(e) => updateEntryState({ title: e.target.value })}
+                        />
+                    </div>
 
-                        {/* Entry Field */}
-                        <div className="form-field">
-                            <label htmlFor="entry" className="form-label">Entry</label>
-                            <textarea
-                                id="entry"
-                                className="form-input form-textarea"
-                                placeholder="Today I felt relaxed and productive."
-                                value={data.content}
-                                onChange={(e) => setData({ ...data, content: e.target.value })}
-                            />
-                        </div>
+                    {/* Entry Field */}
+                    <div className="form-field">
+                        <label htmlFor="entry" className="form-label">Entry</label>
+                        <textarea
+                            id="entry"
+                            className="form-input form-textarea"
+                            placeholder="Today I felt relaxed and productive."
+                            value={currentEntry.content}
+                            onChange={(e) => updateEntryState({ content: e.target.value })}
+                        />
+                    </div>
 
-                        {/* Save Button */}
-                        <button type="submit" className="save-btn">
-                            Save Entry
-                        </button>
-                    </form>
-                </div>
-            )}
+                    {/* Save Button */}
+                    <button 
+                        type="submit" 
+                        className="save-btn flex items-center justify-center gap-2"
+                        disabled={isSaving}
+                    >
+                        {isSaving ? (
+                            <>
+                                <Loader2 className="animate-spin" size={16} />
+                                Saving...
+                            </>
+                        ) : (
+                            'Save Entry'
+                        )}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }
