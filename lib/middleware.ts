@@ -14,6 +14,11 @@ export async function middleware(req: NextRequest) {
                     return req.cookies.getAll();
                 },
             },
+            // setAll(cookies: any) {
+            //     cookies.forEach(({ name, value, options }: any) => {
+            //         res.cookies.set(name, value, options);
+            //     });
+            // },
         }
     );
 
@@ -22,7 +27,9 @@ export async function middleware(req: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user && req.nextUrl.pathname.startsWith('/dashboard')) {
-        return NextResponse.redirect(new URL('/login', req.url));
+        const redirectUrl = req.nextUrl.clone();
+        redirectUrl.pathname = '/login';
+        return NextResponse.redirect(redirectUrl);
     }
 
     return res;
