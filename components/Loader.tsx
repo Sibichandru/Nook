@@ -1,9 +1,11 @@
 'use client'
 
+import Image from 'next/image'
+
 const Loader = ({className="loader-container"}: {className?: string}) => {
   return (
     <div className={`flex flex-1 justify-center items-center h-full w-full ${className}`}>
-      <img
+      <Image
         src="/assets/loading.svg"
         alt="Loading"
         width={40}

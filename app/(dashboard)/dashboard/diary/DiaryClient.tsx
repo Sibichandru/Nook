@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Calendar as MantineCalendar } from '@mantine/dates';
 import dayjs from 'dayjs';
-import Loader from '@/components/Loader';
 import './diary.css';
 import { fetchEntry, saveDiaryEntry } from "./action";
 
@@ -77,7 +76,7 @@ function DiaryClient({ initialEntry }: { initialEntry: DiaryEntry }) {
         setIsLoadingEntry(false);
       }
     }
-  }, [selectedDate, fetchEntry]);
+  }, [selectedDate]);
 
   // Initial load and date changes
   useEffect(() => {
@@ -103,7 +102,7 @@ function DiaryClient({ initialEntry }: { initialEntry: DiaryEntry }) {
       }
     };
 
-  }, [selectedDate, fetchEntry]);
+  }, [selectedDate,getEntry]);
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const nextDate = direction === 'prev'

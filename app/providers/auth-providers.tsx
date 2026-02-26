@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
-    const [user, setUser] = useState<any | null>(null)
+    const [user, setUser] = useState<User | null>(null)
     const [authLoading, setAuthLoading] = useState(true)
 
     useEffect(() => {
@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             isComponentMounted = false
             authListener.subscription.unsubscribe();
         }
-    }, [])
+    }, [supabase.auth])
 
 
     return (
