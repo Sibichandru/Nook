@@ -7,21 +7,19 @@ export async function getCurrentUserWithRole() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return null;
+  if (!user) return { user: null, role: null };
 
-  const { data: roleData, error } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
-    .select('role')
+    .select('roles(role)')
     .eq('id', user.id)
-    .single();
-
+    .maybeSingle();
   if (error) {
     console.error('Role fetch failed', error);
-    return { user, role: null };
+    // throw error if role is not found
+    throw new Error('Role not found');
   }
-  console.log(roleData?.role);
-  return {
-    user,
-    role: roleData?.role ?? 'user',
-  };
+
+  const roleEntry = Array.isArray(data?.roles) ? data.roles[0] : data?.roles;
+  return { user, role: roleEntry?.role ?? null };
 }

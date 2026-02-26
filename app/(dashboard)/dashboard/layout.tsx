@@ -12,7 +12,7 @@ export default function DashboardLayout({
     <div className="dashboard-shell">
       <header className="navbar">
         <Link href="/dashboard" className="logo">
-          MyOS
+          Nook
         </Link>
 
         <nav className="nav-actions">

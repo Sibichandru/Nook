@@ -1,60 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 
-export function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
+const THEME_EVENT = "theme-change";
 
-  // On mount, check localStorage or system preference
+function getThemeSnapshot(): boolean {
+  if (typeof window === "undefined") return false;
+
+  const stored = localStorage.getItem("theme");
+  if (stored === "dark") return true;
+  if (stored === "light") return false;
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function subscribeToTheme(onStoreChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const handleChange = () => onStoreChange();
+
+  window.addEventListener("storage", handleChange);
+  window.addEventListener(THEME_EVENT, handleChange);
+  mediaQuery.addEventListener("change", handleChange);
+
+  return () => {
+    window.removeEventListener("storage", handleChange);
+    window.removeEventListener(THEME_EVENT, handleChange);
+    mediaQuery.removeEventListener("change", handleChange);
+  };
+}
+
+function applyThemeToDocument(isDark: boolean): void {
+  if (typeof document === "undefined") return;
+
+  document.documentElement.classList.toggle("dark", isDark);
+  document.documentElement.setAttribute(
+    "data-mantine-color-scheme",
+    isDark ? "dark" : "light"
+  );
+}
+
+export function ThemeToggle() {
+  const isDark = useSyncExternalStore(
+    subscribeToTheme,
+    getThemeSnapshot,
+    () => false
+  );
+
   useEffect(() => {
-    setMounted(true);
-    // const stored = localStorage.getItem("theme");
-    // if (stored === "dark") {
-    //   setIsDark(true);
-    //   document.documentElement.classList.add("dark");
-    //   document.documentElement.setAttribute("data-mantine-color-scheme", "dark");
-    // } else if (stored === "light") {
-    //   setIsDark(false);
-    //   document.documentElement.classList.remove("dark");
-    //   document.documentElement.setAttribute("data-mantine-color-scheme", "light");
-    // } else {
-    //   // Check system preference
-    //   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    //   setIsDark(prefersDark);
-    //   if (prefersDark) {
-    //     document.documentElement.classList.add("dark");
-    //     document.documentElement.setAttribute("data-mantine-color-scheme", "dark");
-    //   } else {
-    //     document.documentElement.classList.remove("dark");
-    //     document.documentElement.setAttribute("data-mantine-color-scheme", "light");
-    //   }
-    // }
-  }, []);
+    applyThemeToDocument(isDark);
+  }, [isDark]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
-    setIsDark(newIsDark);
-    if (newIsDark) {
-      document.documentElement.classList.add("dark");
-      document.documentElement.setAttribute("data-mantine-color-scheme", "dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.setAttribute("data-mantine-color-scheme", "light");
-      localStorage.setItem("theme", "light");
-    }
+    localStorage.setItem("theme", newIsDark ? "dark" : "light");
+    window.dispatchEvent(new Event(THEME_EVENT));
   };
-
-  // Avoid hydration mismatch by not rendering until mounted
-  if (!mounted) {
-    return (
-      <button className="theme-toggle" aria-label="Toggle theme">
-        <Sun size={20} />
-      </button>
-    );
-  }
 
   return (
     <button

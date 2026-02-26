@@ -9,13 +9,13 @@ export default async function DashboardPage() {
   }
 
   if (session.role !== 'admin') {
-    redirect('/403');
+    redirect('/access-denied');
   }
 
   return (
     <div>
       <h1>Admin Dashboard</h1>
-      <p>Welcome, {session.user.email}</p>
+      <p>Welcome, {session?.user?.email}</p>
     </div>
   );
 }

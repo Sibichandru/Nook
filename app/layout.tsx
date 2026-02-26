@@ -27,13 +27,31 @@ export const metadata: Metadata = {
   },
 };
 
+const themeInitScript = `
+(() => {
+  try {
+    const storedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = storedTheme ? storedTheme === "dark" : prefersDark;
+    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.setAttribute(
+      "data-mantine-color-scheme",
+      isDark ? "dark" : "light"
+    );
+  } catch (_) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <MantineAppProvider>
