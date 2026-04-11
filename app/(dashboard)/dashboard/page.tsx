@@ -13,9 +13,19 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      <p>Welcome, {session?.user?.email}</p>
+    <div
+      className="dashboard-content w-full"
+      style={{
+        backgroundColor: "hsl(var(--sidebar-background))",
+        padding: "2rem",
+      }}
+    >
+      <h1 style={{ fontSize: "1.75rem", marginBottom: "0.5rem" }}>
+        Admin Dashboard
+      </h1>
+      <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.95rem" }}>
+        Welcome, {session?.user?.email}
+      </p>
     </div>
   );
 }

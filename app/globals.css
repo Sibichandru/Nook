@@ -2,130 +2,161 @@
 
 @layer base {
   :root {
-    /* =========================
-       Light Theme — Journal UI
-    ========================= */
+    /* ==========================================================
+       Kinetic Workspace — Light Atmosphere
+       secondary_fixed soft gray base (never pure white)
+    ========================================================== */
 
-    /* Page */
-    --background: 40 18% 96%;
-    /* warm beige */
-    --foreground: 30 12% 22%;
-    /* soft charcoal */
+    /* Base — secondary_fixed #ebebf5 */
+    --background: 240 18% 94%;
+    --foreground: 240 36% 14%;        /* on-surface dark #1a1a2e */
 
-    /* Cards & surfaces */
-    --card: 40 22% 98%;
-    --card-foreground: 30 12% 22%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 36% 14%;
 
-    --popover: 40 22% 98%;
-    --popover-foreground: 30 12% 22%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 36% 14%;
 
-    /* Primary accent — sage green */
-    --primary: 145 18% 45%;
-    --primary-foreground: 40 25% 99%;
+    /* Primary — #4b4dd8 (primary_container value from dark becomes primary here) */
+    --primary: 241 62% 57%;
+    --primary-foreground: 0 0% 100%;
+    --primary-container: 240 100% 87%; /* #c0c1ff */
 
-    /* Secondary surfaces */
-    --secondary: 40 16% 93%;
-    --secondary-foreground: 30 10% 30%;
+    /* Structural regions */
+    --secondary: 240 20% 90%;
+    --secondary-foreground: 238 17% 36%;
 
-    /* Muted UI */
-    --muted: 40 14% 92%;
-    --muted-foreground: 30 8% 48%;
+    /* Interactive hover */
+    --muted: 240 18% 95%;
+    --muted-foreground: 238 17% 46%;
 
-    /* Accent pills / mood */
-    --accent: 140 18% 90%;
-    --accent-foreground: 145 22% 30%;
+    --accent: 240 20% 88%;
+    --accent-foreground: 241 62% 57%;
 
-    /* Errors */
-    --destructive: 0 55% 55%;
-    --destructive-foreground: 40 25% 99%;
+    --destructive: 351 60% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Borders & inputs (very subtle) */
-    --border: 40 14% 88%;
-    --input: 40 14% 90%;
-    --ring: 145 18% 45%;
+    /* Ghost Border — outline-variant #c5c5d8 */
+    --border: 240 16% 82%;
+    --input: 240 16% 91%;
+    --ring: 241 62% 57%;
 
-    /* Radius */
-    --radius: 0.85rem;
+    /* Radius tokens */
+    --radius: 0.75rem;         /* xl — main cards */
+    --radius-sm: 0.5rem;       /* lg — nested elements */
+    --radius-full: 9999px;     /* pill / orb */
 
-    /* Shadows — soft, floating */
-    --shadow:
-      0 12px 30px rgba(0, 0, 0, 0.08),
-      0 4px 10px rgba(0, 0, 0, 0.04);
+    --shadow: 0px 16px 32px rgba(74, 75, 154, 0.1);
+
+    /* Surface hierarchy */
+    --surface-lowest: 240 18% 88%;
+    --surface-low: 240 20% 90%;
+    --surface-base: 240 18% 94%;
+    --surface-container: 0 0% 100%;
+    --surface-high: 240 18% 97%;
+
+    /* Tertiary — attention/warning (#d4582a darker orange for light legibility) */
+    --tertiary: 19 65% 49%;
+    --tertiary-foreground: 0 0% 100%;
 
     /* Mood colors */
-    --mood-very-low: 0 45% 65%;
-    --mood-low: 25 55% 60%;
-    --mood-neutral: 45 45% 55%;
-    --mood-high: 120 30% 55%;
-    --mood-very-high: 145 35% 50%;
+    --mood-very-low: 351 55% 55%;
+    --mood-low: 25 70% 55%;
+    --mood-neutral: 45 55% 50%;
+    --mood-high: 140 40% 48%;
+    --mood-very-high: 241 62% 57%;
 
-    /* Sidebar (same tone as cards) */
-    --sidebar-background: 40 20% 97%;
-    --sidebar-foreground: 30 12% 28%;
-    --sidebar-primary: 145 18% 45%;
-    --sidebar-primary-foreground: 40 25% 99%;
-    --sidebar-accent: 40 16% 93%;
-    --sidebar-accent-foreground: 30 12% 28%;
-    --sidebar-border: 40 14% 88%;
-    --sidebar-ring: 145 18% 45%;
+    /* Sidebar — surface-container-low */
+    --sidebar-background: 240 20% 90%;
+    --sidebar-foreground: 240 36% 14%;
+    --sidebar-primary: 241 62% 57%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 16% 85%;
+    --sidebar-accent-foreground: 240 36% 14%;
+    --sidebar-border: 240 16% 82%;
+    --sidebar-ring: 241 62% 57%;
   }
 
-  /* =========================
-     Dark Theme — Calm & Warm
-  ========================= */
+  /* ==========================================================
+     Kinetic Workspace — Dark Atmosphere (Digital Architect)
+     Midnight Charcoal + Electric Indigo — primary aesthetic
+  ========================================================== */
   .dark {
-    --background: 30 10% 12%;
-    /* warm charcoal */
-    --foreground: 40 20% 88%;
-    /* creamy text */
+    /* Base layer — surface #0b1326 */
+    --background: 222 57% 10%;
+    --foreground: 236 20% 91%;       /* on-surface #e4e5f0 */
 
-    --card: 30 12% 16%;
-    --card-foreground: 40 20% 88%;
+    --card: 222 33% 15%;             /* surface-container #171f33 */
+    --card-foreground: 236 20% 91%;
 
-    --popover: 30 12% 16%;
-    --popover-foreground: 40 20% 88%;
+    --popover: 222 35% 18%;          /* surface-variant (glass base) */
+    --popover-foreground: 236 20% 91%;
 
-    --primary: 145 20% 55%;
-    --primary-foreground: 30 10% 12%;
+    /* Electric Indigo — #c0c1ff (light indigo for dark UI readability) */
+    --primary: 240 100% 87%;
+    --primary-foreground: 0 0% 100%;
+    --primary-container: 241 62% 57%; /* #4b4dd8 — used in gradients */
 
-    --secondary: 30 10% 20%;
-    --secondary-foreground: 40 18% 82%;
+    /* Structural — surface-container-low #131b2e */
+    --secondary: 222 40% 13%;
+    --secondary-foreground: 234 11% 63%;
 
-    --muted: 30 8% 22%;
-    --muted-foreground: 40 10% 60%;
+    /* Interactive — surface-container-high #222a3d */
+    --muted: 222 28% 19%;
+    --muted-foreground: 234 11% 63%;  /* on-surface-variant #9496a8 */
 
-    --accent: 145 15% 22%;
-    --accent-foreground: 145 25% 70%;
+    --accent: 222 28% 19%;
+    --accent-foreground: 240 100% 87%;
 
-    --destructive: 0 45% 45%;
-    --destructive-foreground: 40 20% 88%;
+    --destructive: 351 44% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 30 8% 24%;
-    --input: 30 8% 24%;
-    --ring: 145 20% 55%;
+    /* Ghost Border — outline-variant #3a3d50 */
+    --border: 232 15% 27%;
+    --input: 222 28% 19%;            /* surface-container-high: "etched" */
+    --ring: 240 100% 87%;
 
-    --shadow:
-      0 20px 40px rgba(0, 0, 0, 0.35),
-      0 6px 16px rgba(0, 0, 0, 0.25);
+    /* Ambient shadow — derived from surface-container-lowest #060e20 */
+    --shadow: 0px 24px 48px rgba(6, 14, 32, 0.4);
 
-    --sidebar-background: 30 10% 14%;
-    --sidebar-foreground: 40 18% 82%;
-    --sidebar-primary: 145 20% 55%;
-    --sidebar-primary-foreground: 30 10% 12%;
-    --sidebar-accent: 30 10% 20%;
-    --sidebar-accent-foreground: 40 18% 82%;
-    --sidebar-border: 30 8% 24%;
-    --sidebar-ring: 145 20% 55%;
+    /* Surface hierarchy */
+    --surface-lowest: 222 66% 8%;    /* #060e20 */
+    --surface-low: 222 40% 13%;      /* #131b2e */
+    --surface-base: 222 57% 10%;     /* #0b1326 */
+    --surface-container: 222 33% 15%;/* #171f33 */
+    --surface-high: 222 28% 19%;     /* #222a3d */
+
+    /* Tertiary — #ffb695 warm orange for attention moments */
+    --tertiary: 22 100% 79%;
+    --tertiary-foreground: 222 57% 10%;
+
+    /* Mood colors — calibrated for dark UI */
+    --mood-very-low: 351 44% 60%;
+    --mood-low: 22 100% 79%;
+    --mood-neutral: 45 60% 65%;
+    --mood-high: 150 40% 60%;
+    --mood-very-high: 240 100% 87%;
+
+    /* Sidebar — surface-container-low */
+    --sidebar-background: 222 40% 13%;
+    --sidebar-foreground: 236 20% 91%;
+    --sidebar-primary: 240 100% 87%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 28% 19%;
+    --sidebar-accent-foreground: 236 20% 91%;
+    --sidebar-border: 232 15% 27%;
+    --sidebar-ring: 240 100% 87%;
   }
 }
 
-/* =========================
-   Global polish
-========================= */
+/* ==========================================================
+   Global base styles
+========================================================== */
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    /* Ghost Border Rule — outline-variant at 15% opacity, never 100% */
+    border-color: hsl(var(--border) / 0.15);
   }
 
   html,
@@ -134,6 +165,14 @@
     margin: 0;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  /* Editorial headlines — Manrope with tight letter-spacing */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-manrope), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
 }
 

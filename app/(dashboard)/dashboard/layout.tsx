@@ -1,7 +1,8 @@
-import Link from 'next/link';
-import { UserRound } from 'lucide-react'
-import './dashboard.css'
-import { ThemeToggle } from '@/components/ThemeToggle'
+import Link from "next/link";
+import { UserRound } from "lucide-react";
+import "./dashboard.css";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Sidebar } from "@/components/Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -22,10 +23,12 @@ export default function DashboardLayout({
           </Link>
         </nav>
       </header>
-
-      <main className="dashboard-content">
-        {children}
-      </main>
+      <div className="dashboard-body flex h-[calc(100vh-56px)]">
+        <aside className="w-64 bg-transparent border-r">
+          <Sidebar />
+        </aside>
+        <main className="flex flex-1 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 }
