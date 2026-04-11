@@ -39,9 +39,12 @@ export function useReminderScheduler(
 
     // Keep callbacks current without re-running the effect
     const sendRef = useRef(sendNotification)
-    sendRef.current = sendNotification
     const postRef = useRef(postToSW)
-    postRef.current = postToSW
+
+    useEffect(() => {
+        sendRef.current = sendNotification
+        postRef.current = postToSW
+    }, [sendNotification, postToSW])
 
     // Listen for REMINDER_FIRED messages from the SW to persist state
     useEffect(() => {

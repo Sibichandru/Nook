@@ -64,8 +64,9 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
   const debounceTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   useEffect(() => {
+    const timers = debounceTimers.current
     return () => {
-      debounceTimers.current.forEach((t) => clearTimeout(t))
+      timers.forEach((t) => clearTimeout(t))
     }
   }, [])
 
