@@ -1,0 +1,120 @@
+/* ==========================================================
+   Reminders — Kinetic Workspace
+   No divider lines; space and tonal depth define structure
+========================================================== */
+
+.reminders-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28px 20px;
+  gap: 28px;
+  min-height: 100%;
+}
+
+.reminders-title {
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.reminders-alert {
+  border-radius: var(--radius);
+}
+
+/* Section headers */
+.reminders-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.reminders-section-icon {
+  color: hsl(var(--primary));
+}
+
+/* Quick Preset Cards */
+.preset-card {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border) / 0.15) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.preset-card--active {
+  border-color: hsl(var(--primary) / 0.3) !important;
+  box-shadow: var(--shadow), 0 0 0 1px hsl(var(--primary) / 0.15);
+}
+
+.preset-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.preset-icon-wrapper--active {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary-container) / 0.2) 100%);
+  color: hsl(var(--primary));
+}
+
+.preset-interval-input {
+  background-color: hsl(var(--input)) !important;
+  border-color: hsl(var(--border) / 0.15) !important;
+  color: hsl(var(--foreground)) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 0.85rem !important;
+  text-align: center !important;
+}
+
+.preset-interval-input:focus {
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 4px hsl(var(--primary) / 0.2) !important;
+}
+
+/* Custom form card */
+.custom-form-card {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border) / 0.15) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow);
+}
+
+/* Reminder list items */
+.reminder-item {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border) / 0.15) !important;
+  border-radius: var(--radius-sm) !important;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reminder-item:hover {
+  box-shadow: var(--shadow);
+}
+
+.reminder-item--paused {
+  opacity: 0.5;
+}
+
+/* Delete button */
+.reminder-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  color: hsl(var(--muted-foreground));
+  transition: background-color 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.reminder-delete-btn:hover {
+  background-color: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
+}
