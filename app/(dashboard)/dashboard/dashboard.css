@@ -1,28 +1,44 @@
+/* ==========================================================
+   Dashboard Shell — Kinetic Workspace
+   No-Line Rule: boundaries defined by tonal shifts, not borders
+========================================================== */
+
 .dashboard-shell {
   min-height: 100vh;
   display: flex;
+  width: 100%;
   flex-direction: column;
 }
 
+/* Navbar — glassmorphism floating header */
 .navbar {
   height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  border-bottom: 1px solid hsl(var(--border));
-  background-color: hsl(var(--background));
+  padding: 0 20px;
+  /* Tonal shift defines the region — no border-bottom */
+  background-color: hsl(var(--secondary) / 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
+/* Logo — Manrope editorial style */
 .logo {
-  font-weight: 600;
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
   text-decoration: none;
-  color: inherit;
+  color: hsl(var(--foreground));
 }
 
 .dashboard-content {
   flex: 1;
-  padding: 16px;
+  padding: 24px;
   background-color: hsl(var(--background));
 }
 
@@ -41,15 +57,16 @@
   width: 36px;
   height: 36px;
   border: none;
-  border-radius: var(--radius);
-  background-color: hsl(var(--secondary));
-  color: hsl(var(--secondary-foreground));
+  border-radius: var(--radius-sm);
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.15s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
 
 .theme-toggle:hover {
-  background-color: hsl(var(--accent));
+  background-color: hsl(var(--surface-high, var(--accent)));
+  color: hsl(var(--primary));
   transform: scale(1.05);
 }
 
@@ -64,12 +81,40 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: var(--radius);
-  color: hsl(var(--foreground));
+  border-radius: var(--radius-sm);
+  color: hsl(var(--muted-foreground));
   text-decoration: none;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .nav-icon:hover {
-  background-color: hsl(var(--secondary));
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+/* Sidebar — Structural Region: surface-container-low */
+.sidebar {
+  background-color: hsl(var(--sidebar-background));
+  color: hsl(var(--sidebar-foreground));
+}
+
+/* Sidebar nav items */
+.sidebar .mantine-Button-root {
+  color: hsl(var(--sidebar-foreground)) !important;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.875rem;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.6rem 0.75rem !important;
+  height: auto !important;
+}
+
+.sidebar .mantine-Button-root:hover {
+  background-color: hsl(var(--sidebar-accent)) !important;
+  color: hsl(var(--sidebar-foreground)) !important;
+}
+
+.sidebar .mantine-Button-root[data-active],
+.sidebar .mantine-Button-root:active {
+  background-color: hsl(var(--primary) / 0.12) !important;
+  color: hsl(var(--primary)) !important;
 }
