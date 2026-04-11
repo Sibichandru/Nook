@@ -4,22 +4,23 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 type PermissionState = NotificationPermission | 'unsupported'
 
-function getInitialPermission(): PermissionState {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-        return 'unsupported'
-    }
-    return Notification.permission
-}
-
 export function useNotifications() {
-    const [permission, setPermission] = useState<PermissionState>(getInitialPermission)
+    // Always start with 'granted' to avoid hydration mismatch — the conditional
+    // Alert won't flash on the server, and the real value is set in useEffect.
+    const [permission, setPermission] = useState<PermissionState>('granted')
     const registrationRef = useRef<ServiceWorkerRegistration | null>(null)
     const notificationsRef = useRef<Set<Notification>>(new Set())
 
     useEffect(() => {
-        if (permission === 'unsupported') return
+        if (!('Notification' in window)) {
+            setPermission('unsupported')
+            return
+        }
 
-        if (Notification.permission === 'default') {
+        const current = Notification.permission
+        setPermission(current)
+
+        if (current === 'default') {
             Notification.requestPermission().then(setPermission)
         }
 
@@ -34,7 +35,7 @@ export function useNotifications() {
                     console.warn('SW registration failed:', err)
                 })
         }
-    }, [permission])
+    }, [])
 
     const sendNotification = useCallback(
         (title: string, body: string, icon?: string) => {
