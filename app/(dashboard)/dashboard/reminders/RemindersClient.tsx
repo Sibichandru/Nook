@@ -37,6 +37,62 @@ const QUICK_PRESETS: QuickPreset[] = [
   { key: 'take-a-rest', label: 'Take a Rest', icon: Coffee, defaultInterval: 60 },
 ]
 
+/* ------------------------------------------------------------------ */
+/*  Countdown Ring                                                     */
+/* ------------------------------------------------------------------ */
+
+function CountdownRing({ remainingMs, totalMs }: { remainingMs: number; totalMs: number }) {
+  const size = 96
+  const strokeWidth = 5
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+
+  const progress = Math.max(0, Math.min(1, remainingMs / totalMs))
+  const offset = circumference * (1 - progress)
+
+  const totalSec = Math.max(0, Math.ceil(remainingMs / 1000))
+  const h = Math.floor(totalSec / 3600)
+  const m = Math.floor((totalSec % 3600) / 60)
+  const s = totalSec % 60
+
+  const display =
+    h > 0
+      ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+      : `${m}:${s.toString().padStart(2, '0')}`
+
+  return (
+    <div className="countdown-ring">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          strokeWidth={strokeWidth}
+          className="countdown-track"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className={`countdown-indicator ${progress <= 0.15 ? 'countdown-indicator--urgent' : ''}`}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </svg>
+      <span className="countdown-time">{display}</span>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main component                                                     */
+/* ------------------------------------------------------------------ */
+
 function RemindersClient({ initialReminders }: { initialReminders: Reminder[] }) {
   const [reminders, setReminders] = useState<Reminder[]>(initialReminders)
   const [isCreating, setIsCreating] = useState(false)
@@ -47,11 +103,10 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
   const [intervalMinutes, setIntervalMinutes] = useState<number | string>('')
   const [scheduledAt, setScheduledAt] = useState<string | null>(null)
 
-  const { permission, sendNotification, postToSW } = useNotifications()
-  useReminderScheduler(reminders, sendNotification, postToSW)
+  const { permission, sendNotification } = useNotifications()
+  const countdowns = useReminderScheduler(reminders, sendNotification)
 
   // --- Quick Preset logic ---
-  // Match presets to existing reminders by title
   const getPresetReminder = useCallback(
     (preset: QuickPreset) =>
       reminders.find(
@@ -60,7 +115,7 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
     [reminders],
   )
 
-  // Debounce ref for interval changes (500ms, same pattern as DiaryClient)
+  // Debounce ref for interval changes
   const debounceTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   useEffect(() => {
@@ -74,7 +129,6 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
     const existing = getPresetReminder(preset)
 
     if (checked && !existing) {
-      // Create new preset reminder
       const { data } = await createReminder({
         title: preset.label,
         type: 'recurring',
@@ -85,7 +139,6 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
         setReminders((prev) => [data, ...prev])
       }
     } else if (checked && existing && !existing.is_active) {
-      // Re-activate
       setReminders((prev) =>
         prev.map((r) => (r.id === existing.id ? { ...r, is_active: true } : r)),
       )
@@ -96,7 +149,6 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
         )
       }
     } else if (!checked && existing) {
-      // Deactivate
       setReminders((prev) =>
         prev.map((r) => (r.id === existing.id ? { ...r, is_active: false } : r)),
       )
@@ -114,14 +166,12 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
     const existing = getPresetReminder(preset)
     if (!existing || minutes === null || minutes < 1) return
 
-    // Optimistic local update
     setReminders((prev) =>
       prev.map((r) =>
         r.id === existing.id ? { ...r, interval_minutes: minutes } : r,
       ),
     )
 
-    // Debounce the server save (500ms)
     const prev = debounceTimers.current.get(existing.id)
     if (prev) clearTimeout(prev)
 
@@ -129,7 +179,6 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
       debounceTimers.current.delete(existing.id)
       const { error } = await updateReminder(existing.id, { interval_minutes: minutes })
       if (error) {
-        // Revert on failure
         setReminders((r) =>
           r.map((rem) =>
             rem.id === existing.id
@@ -226,6 +275,7 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
             const isActive = existing?.is_active ?? false
             const interval = existing?.interval_minutes ?? preset.defaultInterval
             const Icon = preset.icon
+            const remainingMs = existing ? countdowns[existing.id] : undefined
 
             return (
               <Card
@@ -234,7 +284,7 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
                 padding="lg"
                 withBorder
               >
-                <Group justify="space-between" mb="sm">
+                <Group justify="space-between" mb={isActive && remainingMs !== undefined ? 4 : 'sm'}>
                   <Group gap="sm">
                     <Box className={`preset-icon-wrapper ${isActive ? 'preset-icon-wrapper--active' : ''}`}>
                       <Icon size={20} />
@@ -249,7 +299,14 @@ function RemindersClient({ initialReminders }: { initialReminders: Reminder[] })
                   />
                 </Group>
 
-                <Group gap="xs" align="center">
+                {isActive && remainingMs !== undefined && (
+                  <CountdownRing
+                    remainingMs={remainingMs}
+                    totalMs={interval * 60_000}
+                  />
+                )}
+
+                <Group gap="xs" align="center" mt={isActive && remainingMs !== undefined ? 4 : 0}>
                   <Text size="xs" c="dimmed">Every</Text>
                   <NumberInput
                     value={interval}
