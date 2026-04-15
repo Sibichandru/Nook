@@ -101,6 +101,41 @@
   opacity: 0.5;
 }
 
+/* Countdown Ring */
+.countdown-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin: 4px auto;
+}
+
+.countdown-track {
+  stroke: hsl(var(--muted));
+  opacity: 0.25;
+}
+
+.countdown-indicator {
+  stroke: hsl(var(--primary));
+  transition: stroke-dashoffset 1s linear, stroke 0.4s ease;
+}
+
+.countdown-indicator--urgent {
+  stroke: hsl(var(--warning, 35 92% 50%));
+}
+
+.countdown-time {
+  position: absolute;
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.01em;
+}
+
 /* Delete button */
 .reminder-delete-btn {
   display: flex;
